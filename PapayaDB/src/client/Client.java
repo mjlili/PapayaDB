@@ -51,7 +51,7 @@ public class Client extends AbstractVerticle {
 
 		HttpServer server = vertx.createHttpServer();
 		server.requestHandler(router::accept).listen(8080);
-
+		System.out.println("Testing GitHub");
 		System.out.println("listen on port 8080");
 	}
 
