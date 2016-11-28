@@ -51,7 +51,6 @@ public class Client extends AbstractVerticle {
 
 		HttpServer server = vertx.createHttpServer();
 		server.requestHandler(router::accept).listen(8080);
-		System.out.println("Testing GitHub");
 		System.out.println("listen on port 8080");
 	}
 
@@ -81,7 +80,8 @@ public class Client extends AbstractVerticle {
 		try {
 			RandomAccessFile randomAccessFile = new RandomAccessFile("./DataBase/dataBase.json", "rw");
 			FileChannel fileChannel = randomAccessFile.getChannel();
-			//On peut utiliser la taille du mappedByteBuffer pour l'indice du document
+			// On peut utiliser la taille du mappedByteBuffer pour l'indice du
+			// document
 			MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, fileChannel.size());
 			fileChannel.position(fileChannel.size());
 			fileChannel.write(byteBuffer);
