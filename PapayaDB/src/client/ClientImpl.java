@@ -13,19 +13,28 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Scanner;
 
-import dataBase.DataBaseCrud;
-
-public class ClientImpl implements Client, DataBaseCrud {
+public class ClientImpl implements Client {
 	private final String host;
 	private final HttpClient httpClient;
 
+	/**
+	 * @author jlilimk
+	 * @param httpClient
+	 */
 	public ClientImpl(HttpClient httpClient) {
 		this.httpClient = httpClient;
 		this.host = "http://localhost:8080";
 	}
 
-	@Override
+	/**
+	 * @author jlilimk
+	 * @param uri
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public void createDocumentUri(String uri) throws IOException, InterruptedException {
 		URI completeUri;
 		try {
@@ -40,7 +49,11 @@ public class ClientImpl implements Client, DataBaseCrud {
 		}
 	}
 
-	@Override
+	/**
+	 * @author jlilimk
+	 * @param uri
+	 * @throws IOException
+	 */
 	public void createDocumentUrl(String uri) throws IOException {
 		URL completeUrl;
 		completeUrl = new URL(host + uri);
@@ -61,10 +74,13 @@ public class ClientImpl implements Client, DataBaseCrud {
 		while ((outPut = bufferdReader.readLine()) != null) {
 			System.out.println(outPut);
 		}
+		httpUrlConnection.getInputStream().reset();
 		httpUrlConnection.disconnect();
 	}
 
-	@Override
+	/**
+	 * @author jlilimk
+	 */
 	public void getAllDocuments() {
 		try {
 			URL getAll = new URL("http://localhost:8080/");
@@ -89,10 +105,80 @@ public class ClientImpl implements Client, DataBaseCrud {
 		}
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	/**
+	 * @author jlilimk
+	 */
+	@Override
+	public void displayApplicationMenu() {
+		System.out.println("*** Welcome on the PapayaDB Application ***");
+		System.out.println("We present to you our features :");
+		System.out.println("#####################################################");
+		System.out.println("#  Note that your request will be case sensitive !  #");
+		System.out.println("#####################################################");
+		System.out.println("To create a new database please enter : createNewDataBase /:databasename");
+		System.out.println("To select another database please enter : selectDatabase /");
+		System.out.println("To delete a specific database please enter : deleteExistingDataBase /:databasename");
+		System.out.println(
+				"To insert a new document into a database please enter : insertDocumentIntoDatabase /:databasename/:documentname/key1=value1&key2=value2...");
+		System.out.println(
+				"To select a specific document please enter : selectDocumentFromDatabase /:databasename?filter1=value1&filter2=value2...");
+		System.out.println(
+				"To delete a specific document please enter : deleteDocumentFromDatabase /:databasename/:documentname");
+	}
+
+	/**
+	 * @author jlilimk
+	 */
+	@Override
+	public void dispatchRequest(String clientRequest) {
+		String[] splitClientRequest = clientRequest.split(" ");
+		StringBuilder uriAsString = new StringBuilder();
+		Arrays.stream(splitClientRequest).skip(1).forEach(element -> uriAsString.append(element));
+		String finalClientRequestAsString = uriAsString.toString();
+		switch (splitClientRequest[0]) {
+		case "createNewDataBase":
+			this.sendPostRequest(finalClientRequestAsString);
+			break;
+		case "selectDatabase":
+			this.sendGetRequest(finalClientRequestAsString);
+			break;
+		case "deleteExistingDataBase":
+			this.sendDeleteRequest(finalClientRequestAsString);
+			break;
+		case "insertDocumentIntoDatabase":
+			this.sendPostRequest(finalClientRequestAsString);
+			break;
+		case "selectDocumentFromDatabase":
+			this.sendGetRequest(finalClientRequestAsString);
+			break;
+		case "deleteDocumentFromDatabase":
+			this.sendDeleteRequest(finalClientRequestAsString);
+			break;
+		default:
+			System.out.println("Sorry we cannot answer your request");
+			displayApplicationMenu();
+			break;
+		}
+	}
+
+	public static void main(String[] args) throws IOException {
 		Client papayaClient = new ClientImpl(HttpClient.getDefault());
-		// papayaClient.createDocumentUri("/Duris/1000");
-		papayaClient.createDocumentUrl("/test");
-		papayaClient.getAllDocuments();
+		papayaClient.displayApplicationMenu();
+		Scanner requestScanner = new Scanner(System.in);
+		System.out.println("Enter a choice please :");
+		String request = requestScanner.nextLine();
+		while (!request.contentEquals("quit")) {
+			papayaClient.dispatchRequest(request);
+			System.out.println("Enter a choice please :");
+			request = requestScanner.nextLine();
+			if (request.contentEquals("menu")) {
+				Runtime.getRuntime().exec("cls");
+				papayaClient.displayApplicationMenu();
+				System.out.println("Enter a choice please :");
+				request = requestScanner.nextLine();
+			}
+		}
+		requestScanner.close();
+		System.out.println("The job is done!");
 	}
 }
