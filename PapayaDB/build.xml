@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<project name="PapayaDB" default="all">
+  <description>
+    Génération de l'application PapayaDB
+  </description>
+
+  <property name="bin" location="bin"/>
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="doc" location="docs/api"/>
+  <property name="lib" location="lib"/>
+
+  <target name="init" description="Initialisation">
+    <tstamp/>
+    <buildnumber file="numerobuild.txt" />
+    <echo message="Generation numero : ${build.number} du ${TODAY}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compilation">
+    <javac srcdir="${src}" destdir="${bin}">
+          <classpath>
+        <pathelement path="${java.class.path}"/>
+        <pathelement location="${junit_path}"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="all" depends="init, compile, doc" 
+    description="Generation complete">
+    <echo message="Generation complete."/>
+  </target>
+	
+  <target name="doc" depends="compile" description="Generation documentation">
+    <javadoc destdir="${doc}" author="true" version="true" use="true" 
+      package="true">
+      <fileset dir = "${src}">
+        <include name="**/*.java"/>
+      </fileset>
+      <classpath>
+        <pathelement path="${java.class.path}"/>
+        <pathelement location="${junit_path}"/>
+      </classpath>
+    </javadoc>
+  </target>
+</project>
