@@ -62,11 +62,9 @@ public class Database extends AbstractVerticle {
 
 	public void disptachPostRequest(RoutingContext routingContext) {
 		if (routingContext.getBodyAsJson().containsKey("username")) {
-			System.out.println("ADDING NEW DATABASE");
 			createNewDataBase(routingContext);
 			return;
 		}
-		System.out.println("NOT ADDING NEW DATABASE");
 		insertDocumentIntoDatabase(routingContext);
 	}
 

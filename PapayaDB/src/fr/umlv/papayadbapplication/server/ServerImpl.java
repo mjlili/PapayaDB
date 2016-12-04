@@ -96,7 +96,8 @@ public class ServerImpl extends AbstractVerticle implements Server {
 			return;
 		}
 		String databaseName = requireNonNull(routingContext.request().getParam("databasename"));
-		JsonObject requestAsJson = new JsonObject().put("databasename", databaseName);
+		JsonObject requestAsJson = new JsonObject().put("databasename", databaseName).put("username", username)
+				.put("password", password);
 		String responseAsString = this.sendPostRequest(requestAsJson);
 		if (responseAsString == null) {
 			routingContext.response().putHeader("Content-Type", "application/json")
