@@ -17,7 +17,8 @@ public class ClientImpl implements Client {
 		System.out.println("#  Note that your request will be case sensitive !  #");
 		System.out.println("#####################################################");
 		System.out.println("To create a new database please enter : createNewDataBase /:databasename");
-		System.out.println("To select another database please enter : selectDatabase /");
+		System.out.println("To get the list of the existing databases please enter : databases /");
+		System.out.println("To get the content of an existing databaseplease enter : selectAllFromDatabase /:databasename");
 		System.out.println("To delete a specific database please enter : deleteExistingDataBase /:databasename");
 		System.out.println(
 				"To insert a new document into a database please enter : insertDocumentIntoDatabase /:databasename/:documentname/key1=value1&key2=value2...");
@@ -40,7 +41,9 @@ public class ClientImpl implements Client {
 		case "createNewDataBase":
 			this.sendPostRequest(finalClientRequestAsString);
 			break;
-		case "selectDatabase":
+		case "selectAllFromDatabase":
+			this.sendGetRequest(finalClientRequestAsString);
+		case "databases":
 			this.sendGetRequest(finalClientRequestAsString);
 			break;
 		case "deleteExistingDataBase":

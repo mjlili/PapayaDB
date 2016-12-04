@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Map;
@@ -52,8 +53,11 @@ public class Database extends AbstractVerticle {
 
 	public void disptachGetRequest(RoutingContext routingContext) {
 		if (routingContext.getBodyAsJson().size() == 1) {
-			getAllDatabases(routingContext);
-			return;
+			if (routingContext.getBodyAsJson().containsKey("uri")) {
+				getAllDatabases(routingContext);
+				return;
+			}
+			selectAllFromDatabase(routingContext);
 		}
 	}
 
@@ -69,6 +73,15 @@ public class Database extends AbstractVerticle {
 
 	}
 
+	public boolean databaseExists(String databaseName) {
+		File databaseDirectory = new File("./Database");
+		File[] files = databaseDirectory.listFiles();
+		if (Arrays.stream(files).filter(database -> database.getName().equals(databaseName + ".json")).count() == 0) {
+			return false;
+		}
+		return true;
+	}
+
 	public void getAllDatabases(RoutingContext routingContext) {
 		File databaseDirectory = new File("./Database");
 		File[] files = databaseDirectory.listFiles();
@@ -82,6 +95,44 @@ public class Database extends AbstractVerticle {
 				.map(database -> database.getName().substring(0, database.getName().length() - 5))
 				.forEach(databaseName -> databases.append(databaseName).append("\n"));
 		routingContext.response().putHeader("Content-Type", "application/json").end(databases.toString());
+	}
+
+	public void selectAllFromDatabase(RoutingContext routingContext) {
+		String databaseName = routingContext.getBodyAsJson().getString("databasename");
+		if (!databaseExists(databaseName)) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("Sorry but there are no databases named : " + databaseName);
+			return;
+		}
+		String databaseContent = getAllDocumentContentAsString(databaseName);
+		if (databaseContent == null) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("The database content cannot be extracted");
+			return;
+		}
+		routingContext.response().putHeader("Content-Type", "application/json")
+				.end("The database " + databaseName + " contains :\n" + databaseContent);
+	}
+
+	private String getAllDocumentContentAsString(String databaseName) {
+		try {
+			RandomAccessFile randomAccessFile = new RandomAccessFile("./Database/" + databaseName + ".json", "r");
+			FileChannel fileChannel = randomAccessFile.getChannel();
+			MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+			StringBuilder content = new StringBuilder();
+			for (int i = 0; i < fileChannel.size(); i++) {
+				content.append((char) mappedByteBuffer.get());
+			}
+			fileChannel.close();
+			randomAccessFile.close();
+			return content.toString();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public void createNewDataBase(RoutingContext routingContext) {
@@ -109,11 +160,11 @@ public class Database extends AbstractVerticle {
 		JsonObject requestAsJson = routingContext.getBodyAsJson();
 		if (pushAJsonDocumentWithMap(requestAsJson)) {
 			routingContext.response().putHeader("Content-Type", "application/json")
-			.end("The document has been created successfully");
+					.end("The document has been created successfully");
 			return;
 		}
 		routingContext.response().putHeader("Content-Type", "application/json")
-		.end("Server Internal error on creating the new document");
+				.end("Server Internal error on creating the new document");
 	}
 
 	/**

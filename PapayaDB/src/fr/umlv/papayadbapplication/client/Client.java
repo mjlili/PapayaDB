@@ -7,9 +7,9 @@ import java.net.http.HttpResponse;
 
 public interface Client {
 
-	public void dispatchRequest(String clientRequest);
-
 	public void displayApplicationMenu();
+
+	public void dispatchRequest(String clientRequest);
 
 	public default void sendGetRequest(String clientRequest) {
 		try {

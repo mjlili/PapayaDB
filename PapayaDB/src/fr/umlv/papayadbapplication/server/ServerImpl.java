@@ -27,6 +27,7 @@ public class ServerImpl extends AbstractVerticle implements Server {
 
 		// route to GET REST APIs
 		router.get("/").handler(this::getAllDatabases);
+		router.get("/:databasename").handler(this::selectAllFromDatabase);
 		router.get("/:databasename?*").handler(this::getDocumentWithFilters);
 
 		// route to POST REST Methods
@@ -53,6 +54,18 @@ public class ServerImpl extends AbstractVerticle implements Server {
 	 */
 	private void getAllDatabases(RoutingContext routingContext) {
 		JsonObject requestAsJson = new JsonObject().put("uri", routingContext.request().uri());
+		String responseAsString = this.sendGetRequest(requestAsJson);
+		if (responseAsString == null) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("Sorry, there are a database problem");
+			return;
+		}
+		routingContext.response().putHeader("Content-Type", "application/json").end(responseAsString);
+	}
+
+	private void selectAllFromDatabase(RoutingContext routingContext) {
+		JsonObject requestAsJson = new JsonObject().put("databasename",
+				routingContext.request().getParam("databasename"));
 		String responseAsString = this.sendGetRequest(requestAsJson);
 		if (responseAsString == null) {
 			routingContext.response().putHeader("Content-Type", "application/json")
@@ -105,7 +118,7 @@ public class ServerImpl extends AbstractVerticle implements Server {
 			requestAsJson.put(entry.getKey(), entry.getValue());
 		}
 		String responseAsString = this.sendPostRequest(requestAsJson);
-	
+
 		routingContext.response().putHeader("Content-Type", "application/json")
 				.end("Document has been created successfully");
 		if (responseAsString == null) {
@@ -115,7 +128,6 @@ public class ServerImpl extends AbstractVerticle implements Server {
 		}
 	}
 
-	
 	public static void main(String[] args) {
 		Vertx vertx = Vertx.vertx();
 		vertx.deployVerticle(new ServerImpl());
