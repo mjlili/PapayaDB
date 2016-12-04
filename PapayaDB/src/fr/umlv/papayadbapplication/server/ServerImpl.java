@@ -1,4 +1,4 @@
-package server;
+package fr.umlv.papayadbapplication.server;
 
 import static java.util.Objects.requireNonNull;
 

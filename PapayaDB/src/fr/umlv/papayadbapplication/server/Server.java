@@ -1,4 +1,4 @@
-package server;
+package fr.umlv.papayadbapplication.server;
 
 import java.io.IOException;
 import java.net.URI;

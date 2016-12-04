@@ -1,4 +1,4 @@
-package client;
+package fr.umlv.papayadbapplication.client;
 
 import java.io.IOException;
 import java.util.Arrays;
