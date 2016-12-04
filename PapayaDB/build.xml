@@ -4,7 +4,7 @@
     Génération de l'application PapayaDB
   </description>
 
-  <property name="bin" location="bin"/>
+  <property name="bin" location="classes"/>
   <property name="src" location="src"/>
   <property name="build" location="build"/>
   <property name="doc" location="docs/api"/>
