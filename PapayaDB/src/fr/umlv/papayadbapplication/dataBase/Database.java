@@ -24,6 +24,9 @@ import io.vertx.ext.web.handler.StaticHandler;
 public class Database extends AbstractVerticle {
 
 	/**
+	 * this methods start the data base server on port 3306 and routes the
+	 * applicant server request to the right method
+	 * 
 	 * @author jlilimk
 	 */
 	@Override
@@ -50,6 +53,13 @@ public class Database extends AbstractVerticle {
 		System.out.println("listen on port 3306");
 	}
 
+	/**
+	 * this method dispatches the get request to the right method. it analyzes
+	 * the request and redirect it. whether it's a get base's names or get
+	 * document's content from a base
+	 * 
+	 * @param routingContext
+	 */
 	public void disptachGetRequest(RoutingContext routingContext) {
 		if (routingContext.getBodyAsJson().size() == 1) {
 			if (routingContext.getBodyAsJson().containsKey("uri")) {
@@ -60,6 +70,13 @@ public class Database extends AbstractVerticle {
 		}
 	}
 
+	/**
+	 * this method dispatches the post request to the right method. it analyzes
+	 * the request and redirect it. whether it's a create a new data base or
+	 * insert a document in a data base
+	 * 
+	 * @param routingContext
+	 */
 	public void disptachPostRequest(RoutingContext routingContext) {
 		if (routingContext.getBodyAsJson().containsKey("username")) {
 			createNewDataBase(routingContext);
@@ -68,10 +85,22 @@ public class Database extends AbstractVerticle {
 		insertDocumentIntoDatabase(routingContext);
 	}
 
+	/**
+	 * not implemented yet
+	 * 
+	 * @param routingContext
+	 */
 	public void disptachDeleteRequest(RoutingContext routingContext) {
 		deleteDatabase(routingContext);
 	}
 
+	/**
+	 * returns true if the data base already exists
+	 * 
+	 * @param databasename
+	 *            a string containing the data base name
+	 * @return boolean exists or not
+	 */
 	public boolean databaseExists(String databaseName) {
 		File databaseDirectory = new File("./Database");
 		File[] files = databaseDirectory.listFiles();
@@ -81,6 +110,11 @@ public class Database extends AbstractVerticle {
 		return true;
 	}
 
+	/**
+	 * the list of all data bases
+	 * 
+	 * @param routingContext
+	 */
 	public void getAllDatabases(RoutingContext routingContext) {
 		File databaseDirectory = new File("./Database");
 		File[] files = databaseDirectory.listFiles();
@@ -96,6 +130,11 @@ public class Database extends AbstractVerticle {
 		routingContext.response().putHeader("Content-Type", "application/json").end(databases.toString());
 	}
 
+	/**
+	 * extracts the content of a data base
+	 * 
+	 * @param routingContext
+	 */
 	public void selectAllFromDatabase(RoutingContext routingContext) {
 		String databaseName = routingContext.getBodyAsJson().getString("databasename");
 		if (!databaseExists(databaseName)) {
@@ -113,6 +152,16 @@ public class Database extends AbstractVerticle {
 				.end("The database " + databaseName + " contains :\n" + databaseContent);
 	}
 
+	/**
+	 * get a map of the data base file and parse it
+	 * 
+	 * @param String-
+	 *            data base name
+	 * @return String - data base content
+	 * @throws FileNotFoundException
+	 *             - if the the file doesn't exist
+	 * @throws IOException
+	 */
 	private String getAllDocumentContentAsString(String databaseName) {
 		try {
 			RandomAccessFile randomAccessFile = new RandomAccessFile("./Database/" + databaseName + ".json", "r");
@@ -134,6 +183,11 @@ public class Database extends AbstractVerticle {
 		}
 	}
 
+	/**
+	 * creates a new data base - a new json file
+	 * 
+	 * @param routingContext
+	 */
 	public void createNewDataBase(RoutingContext routingContext) {
 		String databaseName = (String) Objects.requireNonNull(routingContext.getBodyAsJson().getValue("databasename"));
 		if (databaseExists(databaseName)) {
@@ -153,6 +207,11 @@ public class Database extends AbstractVerticle {
 		}
 	}
 
+	/**
+	 * delete an existing data base
+	 * 
+	 * @param routingContext
+	 */
 	public void deleteDatabase(RoutingContext routingContext) {
 		String databaseName = (String) Objects.requireNonNull(routingContext.getBodyAsJson().getValue("databasename"));
 		if (!databaseExists(databaseName)) {
@@ -175,6 +234,11 @@ public class Database extends AbstractVerticle {
 				.end("Sorry but we were not able to delete the database " + databaseName);
 	}
 
+	/**
+	 * inserts a given document un the data base
+	 * 
+	 * @param routingContext
+	 */
 	public void insertDocumentIntoDatabase(RoutingContext routingContext) {
 		JsonObject requestAsJson = routingContext.getBodyAsJson();
 		if (pushAJsonDocumentWithMap(requestAsJson)) {
@@ -187,9 +251,14 @@ public class Database extends AbstractVerticle {
 	}
 
 	/**
+	 * add a document to the data base using a filechannel map and associate it
+	 * with a data base
+	 * 
 	 * @author jlilimk
-	 * @param routingContext
-	 * @param byteBuffer
+	 * @param Json
+	 *            request
+	 * @return boolean true if the document was add and the association
+	 *         succeeded
 	 */
 	private boolean pushAJsonDocumentWithMap(JsonObject requestAsJson) {
 		try {
@@ -221,6 +290,10 @@ public class Database extends AbstractVerticle {
 	 * 
 	 * @author jlilimk
 	 * @param routingContext
+	 * @return boolean true if the association was successfully made
+	 * @throws FileNotFoundException
+	 *             if the file doesn't exist
+	 * @throws IOException
 	 */
 	private boolean associateDocumentToDatabase(JsonObject requestAsJson) {
 		try {

@@ -16,6 +16,9 @@ import io.vertx.ext.web.handler.StaticHandler;
 
 public class ServerImpl extends AbstractVerticle implements Server {
 	/**
+	 * this methods start the applicant server on port 8080 and routes the
+	 * client request to the right method
+	 * 
 	 * @author jlilimk
 	 */
 	@Override
@@ -51,6 +54,7 @@ public class ServerImpl extends AbstractVerticle implements Server {
 	 * 
 	 * @author jlilimk
 	 * @param routingContext
+	 *            the request given by the client
 	 */
 	private void getAllDatabases(RoutingContext routingContext) {
 		JsonObject requestAsJson = new JsonObject().put("uri", routingContext.request().uri());
@@ -63,6 +67,13 @@ public class ServerImpl extends AbstractVerticle implements Server {
 		routingContext.response().putHeader("Content-Type", "application/json").end(responseAsString);
 	}
 
+	/**
+	 * this method send a GET request to the data base server to get all the
+	 * elements of a given data base
+	 * 
+	 * @param routingContext
+	 *            the request given by the client
+	 */
 	private void selectAllFromDatabase(RoutingContext routingContext) {
 		JsonObject requestAsJson = new JsonObject().put("databasename",
 				routingContext.request().getParam("databasename"));
@@ -76,14 +87,22 @@ public class ServerImpl extends AbstractVerticle implements Server {
 	}
 
 	/**
+	 * this method send a select request with filters to the data base server
+	 * the method isn't implemented yet
+	 * 
 	 * @author jlilimk
 	 * @param routingContext
+	 * 
 	 */
 	private void getDocumentWithFilters(RoutingContext routingContext) {
 
 	}
 
 	/**
+	 * this method send a post request to the data base server to create a new
+	 * data base the creation of a data base need a username and a password
+	 * default user = "root" and default password is "root"
+	 * 
 	 * @author jlilimk
 	 * @param routingContext
 	 */
@@ -108,7 +127,9 @@ public class ServerImpl extends AbstractVerticle implements Server {
 	}
 
 	/**
-	 * @author jlilimk
+	 * this method send a post request to the data base server to add a document
+	 * to the data base
+	 * 
 	 * @param routingContext
 	 */
 	private void insertDocumentIntoDatabase(RoutingContext routingContext) {
@@ -135,6 +156,14 @@ public class ServerImpl extends AbstractVerticle implements Server {
 		}
 	}
 
+	/**
+	 * this method send a delete request to the data base server to delete a
+	 * data base the delete of a data base need a username and a password
+	 * default user = "root" and default password is "root"
+	 * 
+	 * @author jlilimk
+	 * @param routingContext
+	 */
 	public void deleteDatabase(RoutingContext routingContext) {
 		String username = requireNonNull(routingContext.request().getParam("username"));
 		String password = requireNonNull(routingContext.request().getParam("password"));

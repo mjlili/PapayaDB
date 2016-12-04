@@ -11,6 +11,15 @@ public interface Client {
 
 	public void dispatchRequest(String clientRequest);
 
+	/**
+	 * creates a uri from the client request and send a GET request to the
+	 * applicant server. prints the result on the console
+	 * 
+	 * @param the
+	 *            client request as a string
+	 * @throws IOException
+	 *             or InterruptedException if the server is not available
+	 */
 	public default void sendGetRequest(String clientRequest) {
 		try {
 			HttpResponse httpResponse = HttpRequest.create(URI.create("http://localhost:8080" + clientRequest))
@@ -21,6 +30,15 @@ public interface Client {
 		}
 	}
 
+	/**
+	 * creates a uri from the client request and send a POST request to the
+	 * applicant server. prints the result on the console
+	 * 
+	 * @param the
+	 *            client request as a string
+	 * @throws IOException
+	 *             or InterruptedException if the server is not available
+	 */
 	public default void sendPostRequest(String clientRequest) {
 		try {
 			HttpResponse httpResponse = HttpRequest.create(URI.create("http://localhost:8080" + clientRequest))
@@ -31,6 +49,15 @@ public interface Client {
 		}
 	}
 
+	/**
+	 * creates a uri from the client request and send a PUT request to the
+	 * applicant server. prints the result on the console
+	 * 
+	 * @param the
+	 *            client request as a string
+	 * @throws IOException
+	 *             or InterruptedException if the server is not available
+	 */
 	public default void sendUpdateRequest(String clientRequest) {
 		try {
 			HttpResponse httpResponse = HttpRequest.create(URI.create("http://localhost:8080" + clientRequest))
@@ -41,6 +68,15 @@ public interface Client {
 		}
 	}
 
+	/**
+	 * creates a uri from the client request and send a DELETE request to the
+	 * applicant server. prints the result on the console
+	 * 
+	 * @param the
+	 *            client request as a string
+	 * @throws IOException
+	 *             or InterruptedException if the server is not available
+	 */
 	public default void sendDeleteRequest(String clientRequest) {
 		try {
 			HttpResponse httpResponse = HttpRequest.create(URI.create("http://localhost:8080" + clientRequest))

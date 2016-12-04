@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class ClientImpl implements Client {
 
 	/**
-	 * @author jlilimk
+	 * displays the menu of papayaDB
 	 */
 	@Override
 	public void displayApplicationMenu() {
@@ -32,7 +32,12 @@ public class ClientImpl implements Client {
 	}
 
 	/**
+	 * this methods analyzes the client request and redirect it to the right
+	 * method
+	 * 
 	 * @author jlilimk
+	 * @param clientRequest
+	 *            - the request of the client as a string
 	 */
 	@Override
 	public void dispatchRequest(String clientRequest) {
