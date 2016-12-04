@@ -31,12 +31,12 @@ public class ServerImpl extends AbstractVerticle implements Server {
 		router.get("/:databasename?*").handler(this::getDocumentWithFilters);
 
 		// route to POST REST Methods
-		router.post("/:databasename").handler(this::createNewDataBase);
+		router.post("/:databasename/:username/:password").handler(this::createNewDataBase);
 		router.post("/:databasename/:documentname/*").handler(this::insertDocumentIntoDatabase);
 
 		// route to DELETE REST Methods
-		router.delete("/:databasename").handler(null);
-		router.delete("/:databasename/:documentname").handler(null);
+		router.delete("/:databasename/:username/:password").handler(this::deleteDatabase);
+		router.delete("/:databasename/:documentname/:username/:password").handler(null);
 
 		// otherwise serve static pages
 		router.route().handler(StaticHandler.create());
@@ -88,10 +88,16 @@ public class ServerImpl extends AbstractVerticle implements Server {
 	 * @param routingContext
 	 */
 	private void createNewDataBase(RoutingContext routingContext) {
+		String username = requireNonNull(routingContext.request().getParam("username"));
+		String password = requireNonNull(routingContext.request().getParam("password"));
+		if (!username.equals("root") || !password.equals("root")) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("Sorry but you are not authorized to create new databases");
+			return;
+		}
 		String databaseName = requireNonNull(routingContext.request().getParam("databasename"));
 		JsonObject requestAsJson = new JsonObject().put("databasename", databaseName);
 		String responseAsString = this.sendPostRequest(requestAsJson);
-
 		if (responseAsString == null) {
 			routingContext.response().putHeader("Content-Type", "application/json")
 					.end("Sorry, there are a database problem");
@@ -126,6 +132,25 @@ public class ServerImpl extends AbstractVerticle implements Server {
 					.end("Sorry, there are a database problem");
 			return;
 		}
+	}
+
+	public void deleteDatabase(RoutingContext routingContext) {
+		String username = requireNonNull(routingContext.request().getParam("username"));
+		String password = requireNonNull(routingContext.request().getParam("password"));
+		if (!username.equals("root") || !password.equals("root")) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("Sorry but you are not authorized to delete databases");
+			return;
+		}
+		String databaseName = requireNonNull(routingContext.request().getParam("databasename"));
+		JsonObject requestAsJson = new JsonObject().put("databasename", databaseName);
+		String responseAsString = this.sendDeleteRequest(requestAsJson);
+		if (responseAsString == null) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("Sorry, there are a database problem");
+			return;
+		}
+		routingContext.response().putHeader("Content-Type", "application/json").end(responseAsString);
 	}
 
 	public static void main(String[] args) {

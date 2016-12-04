@@ -41,7 +41,6 @@ public class Database extends AbstractVerticle {
 
 		// route to DELETE REST Methods
 		router.delete("/delete").handler(this::disptachDeleteRequest);
-		router.delete("/:databasename/:documentname").handler(null);
 
 		// otherwise serve static pages
 		router.route().handler(StaticHandler.create());
@@ -62,15 +61,17 @@ public class Database extends AbstractVerticle {
 	}
 
 	public void disptachPostRequest(RoutingContext routingContext) {
-		if (routingContext.getBodyAsJson().size() == 1) {
+		if (routingContext.getBodyAsJson().containsKey("username")) {
+			System.out.println("ADDING NEW DATABASE");
 			createNewDataBase(routingContext);
 			return;
 		}
+		System.out.println("NOT ADDING NEW DATABASE");
 		insertDocumentIntoDatabase(routingContext);
 	}
 
 	public void disptachDeleteRequest(RoutingContext routingContext) {
-
+		deleteDatabase(routingContext);
 	}
 
 	public boolean databaseExists(String databaseName) {
@@ -137,9 +138,7 @@ public class Database extends AbstractVerticle {
 
 	public void createNewDataBase(RoutingContext routingContext) {
 		String databaseName = (String) Objects.requireNonNull(routingContext.getBodyAsJson().getValue("databasename"));
-		File databaseDirectory = new File("./Database/");
-		File[] filesList = databaseDirectory.listFiles();
-		if (Arrays.stream(filesList).filter(file -> file.getName().equals(databaseName + ".json")).count() != 0) {
+		if (databaseExists(databaseName)) {
 			routingContext.response().putHeader("Content-Type", "application/json")
 					.end("Sorry but this database name is already in use");
 			return;
@@ -154,6 +153,28 @@ public class Database extends AbstractVerticle {
 			routingContext.response().putHeader("Content-Type", "application/json")
 					.end("Server Internal error on creating the new database file");
 		}
+	}
+
+	public void deleteDatabase(RoutingContext routingContext) {
+		String databaseName = (String) Objects.requireNonNull(routingContext.getBodyAsJson().getValue("databasename"));
+		if (!databaseExists(databaseName)) {
+			routingContext.response().putHeader("Content-Type", "application/json")
+					.end("Sorry but the database " + databaseName + " is not found");
+			return;
+		}
+		File databaseDirectory = new File("./Database");
+		File[] files = databaseDirectory.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].getName().equals(databaseName + ".json")) {
+				if (files[i].delete()) {
+					routingContext.response().putHeader("Content-Type", "application/json")
+							.end("The database " + databaseName + " was deleted successfully");
+					return;
+				}
+			}
+		}
+		routingContext.response().putHeader("Content-Type", "application/json")
+				.end("Sorry but we were not able to delete the database " + databaseName);
 	}
 
 	public void insertDocumentIntoDatabase(RoutingContext routingContext) {
